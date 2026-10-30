@@ -17,11 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # 將靜態網站與 index.md / README 打包上傳
+      # 1. 設定 GitHub Pages 環境
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+        
+      # 2. 透過 Jekyll 將 index.md 與 README 編譯成靜態網頁
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        
+      # 3. 打包編譯好的 _site 資料夾
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
   # 第二階段：閘道驗證 (Gate / Validate)
   validate:
