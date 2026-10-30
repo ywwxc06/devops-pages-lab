@@ -1,0 +1,62 @@
+name: Gated Deploy Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # 第一階段：準備與建置
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # 將靜態網站與 index.md / README 打包上傳
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  # 第二階段：閘道驗證 (Gate / Validate)
+  validate:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Gated Validation Check
+        run: |
+          echo "=== 開始執行閘道驗證 (Gated Check) ==="
+          
+          # 驗證 1：檢查 README.md 是否包含必要的活動區塊標記
+          if grep -q "<!--START_SECTION:activity-->" README.md; then
+            echo "✓ 驗證通過：找到 activity 標記。"
+          else
+            echo "❌ 驗證失敗：缺少 activity 標記！"
+            exit 1
+          fi
+          
+          # 驗證 2：檢查首頁 index.md 是否存在
+          if [ -f "index.md" ]; then
+            echo "✓ 驗證通過：找到 index.md 首頁檔案。"
+          else
+            echo "❌ 驗證失敗：找不到 index.md！"
+            exit 1
+          fi
+          
+          echo "=== 所有閘道驗證項目皆通過！ ==="
+
+  # 第三階段：正式部署 (Deploy) - 只有當 validate 成功才會執行
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
