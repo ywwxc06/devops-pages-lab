@@ -1,7 +1,7 @@
 # Hi, I'm 楊心慈
 
 ## Recent activity
-<!--START_SECTION:wrong-->
+<!--START_SECTION:activity-->
 1. 📝 Committed to master in a private repository
 2. 📝 Committed to master in a private repository
 3. 📝 Committed to master in a private repository
